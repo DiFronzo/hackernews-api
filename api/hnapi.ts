@@ -4,7 +4,11 @@ import { moment } from "https://deno.land/x/deno_moment/mod.ts";
 
 import {StoryObject, StoryItem} from "./interface.ts";
 
-export async function handleApi(base: string, agent: string, options?: any) {
+const baseUrl = "https://hacker-news.firebaseio.com";
+const version = "/v0";
+const userAgent = "Deno Deploy";
+
+export async function handleApi(base: string, options?: any) {
   let pageObj = {page: 1};
   let opts = {...pageObj, ...options};
   let page = opts.page;
@@ -13,11 +17,11 @@ export async function handleApi(base: string, agent: string, options?: any) {
   let endIndex = startIndex + limit;
 
   const response = await fetch(
-    `${base}/topstories.json`,
+    `${baseUrl+version}/${base}.json`,
     {
       method: "GET",
       headers: {
-        "User-Agent": agent,
+        "User-Agent": userAgent,
       },
     },
   );
@@ -41,11 +45,11 @@ export async function handleApi(base: string, agent: string, options?: any) {
   let itemFetches: StoryItem[] = []
   itemFetches = await Promise.all(topstories.slice(startIndex, endIndex).map(async function(itemID: number){
       const response2 = await fetch(
-        `${base}/item/${itemID}.json`,
+        `${baseUrl+version}/item/${itemID}.json`,
         {
           method: "GET",
           headers: {
-            "User-Agent": agent,
+            "User-Agent": userAgent,
           },
         },
       );
