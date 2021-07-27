@@ -1,8 +1,8 @@
 import { h, jsx, serve, validateRequest, PathParams, json } from "https://deno.land/x/sift@0.3.4/mod.ts";
-// deployctl run --libs=ns,fetchevent mod.tsx
+// deployctl run --libs=ns,fetchevent --watch mod.tsx
 
 import {QueryString, StoryObject} from "./api/interface.ts";
-import {handleApi} from "./api/hnapi.ts";
+import {handleApi, handleItemBase} from "./api/hnapi.ts";
 
 // interface Story {
 //   news: string,
@@ -126,11 +126,38 @@ async function handleReq (request: Request, params?: PathParams) {
   }
 
   const getValueQ: QueryString | undefined = getQueryStringParam(request.url, "page");
-  if (getValueQ && getValueQ.page && (parseInt(getValueQ?.page) < 1 || parseInt(getValueQ.page) > 16)) {
+
+  const story: StoryObject[] | { code: string; message: string; } = await handleApi(STORIES[slug], getValueQ);
+
+  if (Array.isArray(story) && story.length === 0) {
     return json({code: "pageNotFound", message: "Failed to retrieve the page!"},{status: 200});
   }
-  const story: StoryObject[] | { code: string; message: string; } = await handleApi(STORIES[slug], getValueQ);
+
   return json(story,{status: 200});
+}
+
+function isNumeric(value: string): boolean {
+    return /^-?\d+$/.test(value);
+}
+
+async function handleItem (request: Request, params?: PathParams) {
+  const { error } = await validateRequest(request, {
+    GET: {},
+  });
+  if (error) {
+    return json({ error: error.message }, { status: error.status });
+  }
+  const { id = "" } = params as { id: string };
+
+  if (id == "" || !isNumeric(id)) {
+    return jsx(<NotFound />, { status: 404 });
+  }
+
+  const item = await handleItemBase(id);
+
+  return json(item,{ status: 200 });
+
+
 }
 
 const App = () => (
@@ -194,6 +221,7 @@ serve({
   "/": () => jsx(<App />),
   "/doc": () => jsx(<Doc />),
   "/:slug": handleReq,
+  "/item/:id": handleItem,
   // The route handler of 404 will be invoked when a route handler
   // for the requested path is not found.
   404: () => jsx(<NotFound />, { status: 404 })
