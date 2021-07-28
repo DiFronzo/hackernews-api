@@ -39,9 +39,9 @@ Demo at https://hackernews-api.deno.dev/.
 
 ## ⭐️ Project assistance
 
-If you want to say **thank you** or/and support active development of `OpenLibrary-GraphQL`:
+If you want to say **thank you** or/and support active development of `HackerNews-API`:
 
-- Add a [GitHub Star](https://github.com/DiFronzo/OpenLibrary-GraphQL) to the project.
+- Add a [GitHub Star](https://github.com/DiFronzo/hackernews-api) to the project.
 
 ## ⚠️ License
 `HackerNews-API` is free and open-source software licensed under the [MIT](https://github.com/DiFronzo/hackernews-api/blob/main/LICENSE). This is not an offical release from [HackerNews](https://github.com/HackerNews/API). Use on your own risk. Logo is owned by Weiran Zhang. It does not meet the [threshold of originality](https://commons.wikimedia.org/wiki/Commons:Threshold_of_originality) needed for copyright protection, and is therefore in the [public domain](https://en.wikipedia.org/wiki/Public_domain).
