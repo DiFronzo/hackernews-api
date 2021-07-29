@@ -1,6 +1,6 @@
-import { json } from "https://deno.land/x/sift@0.3.4/mod.ts";
-import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
-import { moment } from "https://deno.land/x/deno_moment/mod.ts";
+import { json } from "../deps.ts";
+import { Html5Entities } from "../deps.ts";
+import { moment } from "../deps.ts";
 
 import {StoryObject, StoryItem, Item, Poll, Kids, Kid} from "./interface.ts";
 

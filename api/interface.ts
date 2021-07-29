@@ -2,14 +2,14 @@
 export interface StoryObject {
   id: number,
   title: string,
-  points?: number,
-  user?: string,
+  points?: number | null,
+  user?: string | null,
   time: number,
   time_ago: string,
   comments_count: number,
   type: string,
   url: string,
-  domain?: string,
+  domain?: string | null,
 }
 
 export interface StoryItem {
