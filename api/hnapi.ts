@@ -283,6 +283,13 @@ export async function handleUserBase(base: string) {
   }
   const item = await response.json();
 
+  if (item == null){
+    return {
+      code: "userNotFound",
+      message: `user not found`,
+    };
+  }
+
   const userRes: UserRes = {
     id: item.id,
     created_time: item.created,
