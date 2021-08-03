@@ -2,7 +2,7 @@ import { json } from "../deps.ts";
 import { Html5Entities } from "../deps.ts";
 import { moment } from "../deps.ts";
 
-import {StoryObject, StoryItem, Item, Poll, Kids, Kid} from "./interface.ts";
+import {StoryObject, StoryItem, Item, Poll, Kids, Kid, UserRes} from "./interface.ts";
 
 const baseUrl: string = "https://hacker-news.firebaseio.com";
 const version: string = "/v0";
@@ -252,4 +252,44 @@ export async function handleItemBase(base: string) {
 
   return itemRes;
 
+}
+
+export async function handleUserBase(base: string) {
+
+  const response: Response = await fetch(
+    `${baseUrl+version}/user/${base}.json`,
+    {
+      method: "GET",
+      headers: {
+        "User-Agent": userAgent,
+      },
+    },
+  );
+
+  // Handle if the response isn't successful.
+  if (!response.ok) {
+    // If the top stories is not found, reflect that with a message.
+    if (response.status === 404) {
+      return {
+        code: "userNotFound",
+        message: `user not found`,
+      };
+    } else {
+      return {
+        code: "serverError",
+        message: `Failed to retrieve user from firebase. Try again.`,
+      };
+    }
+  }
+  const item = await response.json();
+
+  const userRes: UserRes = {
+    id: item.id,
+    created_time: item.created,
+    created: moment(item.created*1000).fromNow(),
+    karma: item.karma,
+    about: cleanText(item.about)
+  }
+
+  return userRes;
 }

@@ -131,6 +131,8 @@ export const Doc = () => (
     <p>Returns 30 job stories/posts from the front page.<br/> Example request: https://hackernews-api.deno.dev/jobs</p>
     <h3>GET /item/:id</h3>
     <p>Returns the details of the story/post with (nested) comments.<br/> Example request: https://hackernews-api.deno.dev/item/3338485</p>
+    <h3>GET /user/:id</h3>
+    <p>Returns the details of the user.<br/> Example request: https://hackernews-api.deno.dev/user/li</p>
   </body>
 </html>
 );

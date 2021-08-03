@@ -87,3 +87,11 @@ export interface Item {
   comments_count?: number,
   comments?: Item[]
 }
+
+export interface UserRes {
+  id: number,
+  created_time: number,
+  created: string,
+  karma: number,
+  about?: string | undefined
+}

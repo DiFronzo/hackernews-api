@@ -1,8 +1,8 @@
 import { h, jsx, serve, validateRequest, PathParams, json } from "./deps.ts";
 // deployctl run --libs=ns,fetchevent --watch mod.tsx
 
-import {QueryString, StoryObject} from "./api/interface.ts";
-import {handleApi, handleItemBase} from "./api/hnapi.ts";
+import {QueryString, StoryObject, UserRes} from "./api/interface.ts";
+import {handleApi, handleItemBase, handleUserBase} from "./api/hnapi.ts";
 import {style, App, Doc, NotFound} from "./public/index.tsx";
 
 // interface Story {
@@ -76,11 +76,31 @@ async function handleItem (request: Request, params?: PathParams) {
 
 }
 
+async function handleUser (request: Request, params?: PathParams) {
+  const { error } = await validateRequest(request, {
+    GET: {},
+  });
+  if (error) {
+    return json({ error: error.message }, { status: error.status });
+  }
+  const { id = "" } = params as { id: string };
+
+  if (id == "") {
+    return jsx(<NotFound />, { status: 404 });
+  }
+
+  const item: UserRes | { code: string; message: string; }  = await handleUserBase(id);
+
+  return json(item,{ status: 200 });
+
+}
+
 serve({
   "/": () => jsx(<App />),
   "/doc": () => jsx(<Doc />),
   "/:slug": handleReq,
   "/item/:id": handleItem,
+  "/user/:id": handleUser,
   // The route handler of 404 will be invoked when a route handler
   // for the requested path is not found.
   404: () => jsx(<NotFound />, { status: 404 })
