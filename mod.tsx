@@ -2,7 +2,7 @@ import { h, jsx, serve, validateRequest, PathParams, json } from "./deps.ts";
 // deployctl run --libs=ns,fetchevent --watch mod.tsx
 
 import {QueryString, StoryObject, UserRes} from "./api/interface.ts";
-import {handleApi, handleItemBase, handleUserBase} from "./api/hnapi.ts";
+import {handleApi, handleItemBase, handleUserBase, handleNewCommentsBase} from "./api/hnapi.ts";
 import {style, App, Doc, NotFound} from "./public/index.tsx";
 
 // interface Story {
@@ -85,7 +85,7 @@ async function handleUser (request: Request, params?: PathParams) {
   }
   const { id = "" } = params as { id: string };
 
-  if (id == "") {
+  if (id == "" || id == null) {
     return jsx(<NotFound />, { status: 404 });
   }
 
@@ -95,9 +95,24 @@ async function handleUser (request: Request, params?: PathParams) {
 
 }
 
+async function handleNewComments (request: Request) {
+  const { error } = await validateRequest(request, {
+    GET: {},
+  });
+  if (error) {
+    return json({ error: error.message }, { status: error.status });
+  }
+
+  const item: any  = await handleNewCommentsBase();
+
+  return json(item, { status: 200 });
+
+}
+
 serve({
   "/": () => jsx(<App />),
   "/doc": () => jsx(<Doc />),
+  "/newcomments": handleNewComments,
   "/:slug": handleReq,
   "/item/:id": handleItem,
   "/user/:id": handleUser,

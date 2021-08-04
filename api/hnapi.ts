@@ -145,6 +145,13 @@ async function handleApiItem(base: string) {
   }
   const item = await response.json();
 
+  if (item == null){
+    return {
+      code: "itemNotFound",
+      message: `item not found`,
+    };
+  }
+
   var kidsPromises: Kids[] = [];
   if (item.kids && item.kids.length) {
     kidsPromises = await Promise.all(item.kids.map(async function(kid: number){
@@ -178,6 +185,10 @@ async function handleApiItem(base: string) {
 
 export async function handleItemBase(base: string) {
   const item = await handleApiItem(base);
+
+  if (item && item.code == "itemNotFound"){
+    return item
+  }
 
   let itemRes: Item = {
     id: item.id,
@@ -300,3 +311,66 @@ export async function handleUserBase(base: string) {
 
   return userRes;
 }
+
+export async function handleNewCommentsBase() {
+
+  const response: Response = await fetch(
+    `${baseUrl+version}/updates/items.json`,
+    {
+      method: "GET",
+      headers: {
+        "User-Agent": userAgent,
+      },
+    },
+  );
+
+  // Handle if the response isn't successful.
+  if (!response.ok) {
+    // If the top stories is not found, reflect that with a message.
+    if (response.status === 404) {
+      return {
+        code: "newItemsNotFound",
+        message: `new items not found`,
+      };
+    } else {
+      return {
+        code: "serverError",
+        message: `Failed to retrieve new items from firebase. Try again.`,
+      };
+    }
+  }
+  const newItems: number[] = await response.json();
+  let itemFetches: any = []
+  itemFetches = await Promise.all(newItems.map(async function(itemID: number){
+
+      const response2 = await fetch(
+        `${baseUrl+version}/item/${itemID}.json`,
+        {
+          method: "GET",
+          headers: {
+            "User-Agent": userAgent,
+          },
+        },
+      );
+      if (!response.ok) {
+        if (response.status === 404) {
+          return {
+            code: "itemNotFound",
+            message: `item (${itemID}) not found`,
+          };
+        } else {
+          return {
+            code: "serverError",
+            message: `Failed to retrieve item from firebase. Try again.`,
+          };
+        }
+      }
+      return await response2.json();
+    }));
+
+  return itemFetches;
+
+}
+
+
+//https://hacker-news.firebaseio.com/v0/updates/items.json
