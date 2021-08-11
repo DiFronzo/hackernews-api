@@ -95,3 +95,13 @@ export interface UserRes {
   karma: number,
   about?: string | undefined
 }
+
+export interface NewComments {
+  id: number,
+  level: number,
+  user: string,
+  time_ago: string,
+  content: string,
+  type: string,
+  resp?: number[]
+}

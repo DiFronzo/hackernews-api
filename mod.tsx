@@ -102,8 +102,13 @@ async function handleNewComments (request: Request) {
   if (error) {
     return json({ error: error.message }, { status: error.status });
   }
+  const getValueQ: QueryString | undefined = getQueryStringParam(request.url, "page");
 
-  const item: any  = await handleNewCommentsBase();
+  const item: any  = await handleNewCommentsBase(getValueQ);
+
+  if (Array.isArray(item) && item.length === 0) {
+    return json({code: "pageNotFound", message: "Failed to retrieve the page!"},{status: 200});
+  }
 
   return json(item, { status: 200 });
 

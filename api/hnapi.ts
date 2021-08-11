@@ -2,7 +2,7 @@ import { json } from "../deps.ts";
 import { Html5Entities } from "../deps.ts";
 import { moment } from "../deps.ts";
 
-import {StoryObject, StoryItem, Item, Poll, Kids, Kid, UserRes} from "./interface.ts";
+import {StoryObject, StoryItem, Item, Poll, Kids, Kid, UserRes, NewComments} from "./interface.ts";
 
 const baseUrl: string = "https://hacker-news.firebaseio.com";
 const version: string = "/v0";
@@ -312,7 +312,14 @@ export async function handleUserBase(base: string) {
   return userRes;
 }
 
-export async function handleNewCommentsBase() {
+export async function handleNewCommentsBase(options?: any) {
+
+  let pageObj = {page: 1};
+  let opts = {...pageObj, ...options};
+  let page = opts.page;
+  let limit: number = 30;
+  let startIndex: number = (page-1) * limit;
+  let endIndex: number = startIndex + limit;
 
   const response: Response = await fetch(
     `${baseUrl+version}/updates/items.json`,
@@ -340,8 +347,9 @@ export async function handleNewCommentsBase() {
     }
   }
   const newItems: number[] = await response.json();
+
   let itemFetches: any = []
-  itemFetches = await Promise.all(newItems.map(async function(itemID: number){
+  itemFetches = await Promise.all(newItems.slice(startIndex, endIndex).map(async function(itemID: number){
 
       const response2 = await fetch(
         `${baseUrl+version}/item/${itemID}.json`,
@@ -353,22 +361,53 @@ export async function handleNewCommentsBase() {
         },
       );
       if (!response.ok) {
-        if (response.status === 404) {
-          return {
-            code: "itemNotFound",
-            message: `item (${itemID}) not found`,
-          };
-        } else {
-          return {
-            code: "serverError",
-            message: `Failed to retrieve item from firebase. Try again.`,
-          };
-        }
+        return Promise.reject(response2);
       }
+
       return await response2.json();
     }));
 
-  return itemFetches;
+    const result = await itemFetches.filter((itemFetches: any) => itemFetches.type == "comment");
+    result.sort((a: any, b: any) => parseFloat(b.time) - parseFloat(a.time));
+
+    // let kidsFatches: any = await Promise.all(result.map(function(kids?: number[]){
+    // const shit = await kidsPromises(result);
+    // console.log(shit);
+
+    // let commentsCount: number = 0;
+    // var formatComments = async function(obj: Item, kids: Kids[], level: number){
+    //   if (kids && kids.length){
+    //     kids = kids.filter(function(kid: Kids){
+    //       return !!kid;
+    //     });
+    //     if (!kids.length){
+    //       obj.comments = [];
+    //       return;
+    //     }
+    //     commentsCount += kids.length;
+    //     obj.comments = kids.map(function (kid: Kids) {
+    //       let res: any = {
+    //         id: kid.id,
+    //         level: level,
+    //         user: kid.by,
+    //         time: kid.time,
+    //         time_ago: moment(kid.time * 1000).fromNow(),
+    //         content: kid.deleted ? '[deleted]' : cleanText(kid.text),
+    //         deleted: kid.deleted,
+    //         dead: kid.dead,
+    //         comments: kid.comments
+    //       };
+    //       formatComments(res, kid._kids, level + 1);
+    //       return res;
+    //     });
+    //   } else {
+    //     obj.comments = [];
+    //   }
+    // };
+    // formatComments(itemRes, shit._kids, 0);
+    // itemRes.comments_count = commentsCount;
+
+    return result;
 
 }
 
