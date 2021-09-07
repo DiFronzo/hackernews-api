@@ -35,7 +35,7 @@ Running online on Deno Deploy:<br/>
 
 ## ⚙️ Usage & Options
 
-Demo at https://hackernews-api.deno.dev/.
+See https://hackernews-api.deno.dev/doc/.
 
 ## ⭐️ Project assistance
 
